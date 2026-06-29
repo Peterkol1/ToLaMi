@@ -1,0 +1,70 @@
+import music21
+
+# A dictionary mapping standard musical intervals to Tonic Sol-fa syllables.
+# This handles the major diatonic scale and common accidentals.
+SOLFA_MAP = {
+    'P1': 'd',   # Perfect Unison (Doh)
+    'm2': 'ra',  # Minor 2nd
+    'M2': 'r',   # Major 2nd (Re)
+    'm3': 'ma',  # Minor 3rd
+    'M3': 'm',   # Major 3rd (Mi)
+    'P4': 'f',   # Perfect 4th (Fa)
+    'A4': 'fi',  # Augmented 4th / Diminished 5th
+    'd5': 'fi',  
+    'P5': 's',   # Perfect 5th (So)
+    'm6': 'le',  # Minor 6th
+    'M6': 'l',   # Major 6th (La)
+    'm7': 'ta',  # Minor 7th
+    'M7': 't'    # Major 7th (Ti)
+}
+
+def convert_midi_to_solfa(midi_file_path):
+    print(f"Loading and analyzing: {midi_file_path}...\n")
+    
+    # 1. Parse the MIDI file into a music21 stream
+    try:
+        score = music21.converter.parse(midi_file_path)
+    except Exception as e:
+        return f"Error reading MIDI file: {e}"
+
+    # 2. Detect the key of the song
+    key = score.analyze('key')
+    tonic = key.tonic
+    print(f"🎵 Detected Key: {key.tonic.name} {key.mode.capitalize()}")
+    print("-" * 30)
+
+    solfa_output = []
+
+    # 3. Extract notes and map them
+    # .flatten() removes nested tracks/parts so we just get a list of sequential notes
+    for note_event in score.flatten().notes:
+        
+        # Handle chords by isolating the highest pitch (usually the melody)
+        if note_event.isChord:
+            current_pitch = note_event[-1].pitch
+        else:
+            current_pitch = note_event.pitch
+            
+        # 4. Calculate the interval between the Key's Tonic and the Current Note
+        interval = music21.interval.Interval(noteStart=tonic, noteEnd=current_pitch)
+        
+        # .simpleName converts compound intervals (like a 9th) into simple ones (like a 2nd)
+        interval_name = interval.simpleName 
+        
+        # 5. Look up the solfa syllable, default to '?' if it's a weird microtone
+        solfa_syllable = SOLFA_MAP.get(interval_name, '?')
+        
+        solfa_output.append(solfa_syllable)
+
+    # Join the sequence into a readable string
+    final_sheet = " - ".join(solfa_output)
+    return final_sheet
+
+# --- Testing the Engine ---
+if __name__ == "__main__":
+    # Replace 'your_song.mid' with the path to a test MIDI file on your machine
+    test_file = "bach_846.mid" 
+    
+    result = convert_midi_to_solfa(test_file)
+    print("\n🎼 Tonic Sol-fa Extraction:")
+    print(result)

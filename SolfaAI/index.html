@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolfaAI - Sheet Music Viewer</title>
+    <!-- This imports the OpenSheetMusicDisplay library directly from the web -->
+    <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.8/build/opensheetmusicdisplay.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+        }
+        #sheet-music-container {
+            width: 90%;
+            max-width: 1200px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎼 SolfaAI Web Viewer</h1>
+    <p>Your generated Tonic Sol-fa notation is rendered below.</p>
+
+    <!-- This empty box is where the sheet music will be drawn -->
+    <div id="sheet-music-container"></div>
+
+    <script>
+        // Initialize the Sheet Music Engine
+        var osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay("sheet-music-container");
+        
+        // Load the MusicXML file we generated from Python and render it
+        osmd.load("solfa_sheet.mxl").then(function() {
+            osmd.render();
+        }).catch(function(error) {
+            console.error("Error loading the sheet music: ", error);
+            document.getElementById("sheet-music-container").innerHTML = "<p style='color:red;'>Could not load solfa_sheet.mxl. Make sure you ran the Python script first!</p>";
+        });
+    </script>
+
+</body>
+</html>
